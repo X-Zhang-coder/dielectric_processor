@@ -60,12 +60,17 @@ def mergeFiles(filelist: list):
         matrix_out = np.concatenate((matrix_out[:k, :], matrix_adjusted), axis=0)
     return matrix_out
 
-def savedata(data: np.array, dir: str, temp, freq, transpose=False):
+def savedata(data: np.array, temp, freq, dir: str=None, transpose=False, head=''):
+    if dir is None:
+        dir = f'{vname(data, locals())}.csv'
     data_freq = np.concatenate((freq[np.newaxis,:], data), axis=0)
     data_full = np.concatenate((temp[:,np.newaxis], data_freq), axis=1)
     if transpose:
         data_full = data_full.T
-    np.savetxt(dir, data_full, delimiter=',')
+        head_tmp = 'Temperature(℃)' + f',{head}'*(len(temp)//(head.count(',')+1)) + '\n' + ',kΩ·m'*(len(temp)-1) + '\nFrequency(Hz)'
+    else:
+        head_tmp = 'Frequency(Hz)'+ f',{head}'*len(freq) + '\nTemperature(℃)'
+    np.savetxt(dir, data_full, delimiter=',', header=head_tmp)
 
 if __name__ == '__main__':
     txt_files = [file for file in os.listdir('./') if file.endswith('.txt')]
@@ -78,6 +83,9 @@ if __name__ == '__main__':
     z2_negative = area / (capacitance * frequency[np.newaxis, :] * 2 * pi * thickness) / 1e3  # kΩ·m
     z1 = z2_negative / loss             # kΩ·m
     for data in [permittivity, loss]:
-        savedata(data, f'{vname(data, locals())}.csv', temperature, frequency)
+        savedata(data, temperature, frequency, dir=f'{vname(data, locals())}.csv', head=vname(data, locals()))
     for data in [z1, z2_negative]:
-        savedata(data, f'{vname(data, locals())}.csv', temperature, frequency, transpose=True)
+        savedata(data, temperature, frequency, dir=f'{vname(data, locals())}.csv', transpose=True, head=vname(data, locals()))
+    z1_z2 = np.insert(z2_negative, np.arange(0,z1.shape[0],1), z1, axis=0)
+    temp2 = np.insert(temperature, np.arange(0,temperature.shape[0],1), temperature, axis=0)[1:]
+    savedata(z1_z2, temp2, frequency, f'{vname(z1_z2, locals())}.csv', transpose=True, head='Z\',-Z"')
