@@ -53,10 +53,13 @@ def mergeFiles(filelist: list):
     for matrix in matrixes[1:]:
         first = matrix[1, :]
         k = -1
+        if matrix_out[k, 0] < first[0]:
+            matrix_out = np.concatenate((matrix_out, matrix[1:,:]))
+            continue
         while matrix_out[k, 0] > first[0]:
             k -= 1
         last = matrix_out[k, :]
-        matrix_adjusted = matrix[2:, :] / first[np.newaxis, :] * last[np.newaxis, :]
+        matrix_adjusted = matrix[1:, :] / first[np.newaxis, :] * last[np.newaxis, :]
         matrix_out = np.concatenate((matrix_out[:k, :], matrix_adjusted), axis=0)
     return matrix_out
 
