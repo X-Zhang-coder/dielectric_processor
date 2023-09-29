@@ -70,7 +70,7 @@ def savedata(data: np.array, temp, freq, dir: str=None, transpose=False, head=''
         head_tmp = 'Temperature(℃)' + f',{head}'*(len(temp)//(head.count(',')+1)) + '\n' + ',kΩ·m'*(len(temp)-1) + '\nFrequency(Hz)'
     else:
         head_tmp = 'Frequency(Hz)'+ f',{head}'*len(freq) + '\nTemperature(℃)'
-    np.savetxt(dir, data_full, delimiter=',', header=head_tmp)
+    np.savetxt(dir, data_full, delimiter=',', header=head_tmp, comments='')
 
 if __name__ == '__main__':
     txt_files = [file for file in os.listdir('./') if file.endswith('.txt')]
